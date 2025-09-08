@@ -112,27 +112,9 @@ EXE: Ahk2Exe + `window-mover-simple.ico`.
 
 ---
 
-## Build Icons (Windows / Linux / macOS)
+## Build Icons (Google Colab)
 
-This project includes a cross-platform script to generate icons.
-
-### Requirements
-- [Python 3](https://www.python.org/downloads/)
-- [Pillow](https://pypi.org/project/pillow/) (`pip install pillow`)
-
-### Usage
-Run from the project root:
-
-```bash
-# Default (black on transparent, PNG 256px + ICO multi-size)
-python make_icons.py
-
-# Example: white on blue background, PNG 512px
-python make_icons.py --fg #FFFFFF --bg #1E90FF --size 512
-
-# Custom output paths
-python make_icons.py --png assets/icon.png --ico assets/icon.ico
-```
+Cut and paste code inside Google Colab
 ---
 
 ## License
