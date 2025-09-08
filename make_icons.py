@@ -1,9 +1,8 @@
 # make_icons.py
-# Cross-platform icon generator for Window Mover
-# PNG: rounded-caps corners, 1px stroke
-# ICO: square-caps corners, 1px stroke
-# Both: arrows bigger and separated by 1px
-# Requires: Pillow  (pip install pillow)
+# Generates both:
+#  - ICO: 1px corners (square caps), big arrows separated by 1px
+#  - PNG: simple style like provided image (square caps, uniform thickness)
+# Cross-platform (Windows/Linux/macOS). Requires: Pillow (pip install pillow)
 
 from PIL import Image, ImageDraw
 import argparse
@@ -22,105 +21,84 @@ def parse_color(s: str):
         return (r, g, b, a)
     raise ValueError("Color must be hex like #000000 or #000000FF, or 'transparent'")
 
-def draw_round_line(draw, p1, p2, width, color):
-    draw.line([p1, p2], fill=color, width=width)
-    r = width / 2
-    for (x, y) in (p1, p2):
-        draw.ellipse([x - r, y - r, x + r, y + r], fill=color)
-
-def icon_png(sz, fg, bg=None):
-    """PNG con angoli arrotondati, bordo 1px, frecce grandi separate 1px."""
+# ---------- PNG (simple, like uploaded image) ----------
+def png_simple(sz, fg, bg=None, pad_ratio=0.10, seg_ratio=0.28, thickness=None):
+    """Square-caps corners (no rounded), uniform thickness; no text."""
     img = Image.new("RGBA", (sz, sz), (0,0,0,0) if bg is None else bg)
-    draw = ImageDraw.Draw(img)
-    pad = max(2, int(sz * 0.10))
-    seg = int(sz * 0.28)
-    thickness = 1  # 1px richiesto
+    d = ImageDraw.Draw(img)
 
-    # corner lines (rounded caps)
-    draw_round_line(draw, (pad, pad), (pad + seg, pad), thickness, fg)               # TL h
-    draw_round_line(draw, (pad, pad), (pad, pad + seg), thickness, fg)               # TL v
-    draw_round_line(draw, (sz - pad, pad), (sz - pad - seg, pad), thickness, fg)     # TR h
-    draw_round_line(draw, (sz - pad, pad), (sz - pad, pad + seg), thickness, fg)     # TR v
-    draw_round_line(draw, (pad, sz - pad), (pad + seg, sz - pad), thickness, fg)     # BL h
-    draw_round_line(draw, (pad, sz - pad), (pad, sz - pad - seg), thickness, fg)     # BL v
-    draw_round_line(draw, (sz - pad, sz - pad), (sz - pad - seg, sz - pad), thickness, fg) # BR h
-    draw_round_line(draw, (sz - pad, sz - pad), (sz - pad, sz - pad - seg), thickness, fg) # BR v
+    pad = max(1, int(sz * pad_ratio))
+    seg = int(sz * seg_ratio)
+    t   = max(1, thickness if thickness is not None else int(sz * 0.08))
 
-    # arrows (bigger + 1px gap)
-    arrow_w = int(sz * 0.16)
-    arrow_h = int(sz * 0.34)
-    gap = 1
+    # corners (square caps via rectangles)
+    # Top-left
+    d.rectangle([pad, pad, pad+seg, pad+t], fill=fg)       # horizontal
+    d.rectangle([pad, pad, pad+t,   pad+seg], fill=fg)     # vertical
+    # Top-right
+    d.rectangle([sz-pad-seg, pad, sz-pad, pad+t], fill=fg)
+    d.rectangle([sz-pad-t,   pad, sz-pad, pad+seg], fill=fg)
+    # Bottom-left
+    d.rectangle([pad, sz-pad-t, pad+seg, sz-pad], fill=fg)
+    d.rectangle([pad, sz-pad-seg, pad+t, sz-pad], fill=fg)
+    # Bottom-right
+    d.rectangle([sz-pad-seg, sz-pad-t, sz-pad, sz-pad], fill=fg)
+    d.rectangle([sz-pad-t,   sz-pad-seg, sz-pad, sz-pad], fill=fg)
 
-    cx = int(sz * 0.32) - gap; cy = sz // 2
-    draw.polygon([(cx + arrow_w, cy - arrow_h // 2),
-                  (cx + arrow_w, cy + arrow_h // 2),
-                  (cx - arrow_w, cy)], fill=fg)
-
-    cx2 = int(sz * 0.68) + gap; cy2 = sz // 2
-    draw.polygon([(cx2 - arrow_w, cy2 - arrow_h // 2),
-                  (cx2 - arrow_w, cy2 + arrow_h // 2),
-                  (cx2 + arrow_w, cy2)], fill=fg)
-
+    # No arrows in the PNG according to the sample you sent
     return img
 
-def icon_ico_layer(sz, fg, bg=None):
-    """ICO semplificata (square caps), bordo 1px, frecce grandi separate 1px."""
+# ---------- ICO (1px corners + bigger arrows separated by 1px) ----------
+def ico_layer(sz, fg, bg=None, pad_ratio=0.10, seg_ratio=0.28, gap=1):
     img = Image.new("RGBA", (sz, sz), (0,0,0,0) if bg is None else bg)
-    draw = ImageDraw.Draw(img)
-    pad = max(1, int(sz * 0.10))
-    seg = int(sz * 0.28)
-    thickness = 1  # 1px richiesto
+    d = ImageDraw.Draw(img)
 
-    # corners square (rectangles)
-    # TL
-    draw.rectangle([pad, pad, pad + seg, pad + thickness], fill=fg)       # h
-    draw.rectangle([pad, pad, pad + thickness, pad + seg], fill=fg)       # v
-    # TR
-    draw.rectangle([sz - pad - seg, pad, sz - pad, pad + thickness], fill=fg)
-    draw.rectangle([sz - pad - thickness, pad, sz - pad, pad + seg], fill=fg)
-    # BL
-    draw.rectangle([pad, sz - pad - thickness, pad + seg, sz - pad], fill=fg)
-    draw.rectangle([pad, sz - pad - seg, pad + thickness, sz - pad], fill=fg)
-    # BR
-    draw.rectangle([sz - pad - seg, sz - pad - thickness, sz - pad, sz - pad], fill=fg)
-    draw.rectangle([sz - pad - thickness, sz - pad - seg, sz - pad, sz - pad], fill=fg)
+    pad = max(1, int(sz * pad_ratio))
+    seg = int(sz * seg_ratio)
+    t   = 1  # 1px stroke for ICO corners
 
-    # arrows (bigger + 1px gap)
-    arrow_w = int(sz * 0.16)
-    arrow_h = int(sz * 0.34)
-    gap = 1
+    # corners square 1px
+    d.rectangle([pad, pad, pad+seg, pad+t], fill=fg)
+    d.rectangle([pad, pad, pad+t,   pad+seg], fill=fg)
+    d.rectangle([sz-pad-seg, pad, sz-pad, pad+t], fill=fg)
+    d.rectangle([sz-pad-t,   pad, sz-pad, pad+seg], fill=fg)
+    d.rectangle([pad, sz-pad-t, pad+seg, sz-pad], fill=fg)
+    d.rectangle([pad, sz-pad-seg, pad+t, sz-pad], fill=fg)
+    d.rectangle([sz-pad-seg, sz-pad-t, sz-pad, sz-pad], fill=fg)
+    d.rectangle([sz-pad-t,   sz-pad-seg, sz-pad, sz-pad], fill=fg)
 
-    cx = int(sz * 0.32) - gap; cy = sz // 2
-    draw.polygon([(cx + arrow_w, cy - arrow_h // 2),
-                  (cx + arrow_w, cy + arrow_h // 2),
-                  (cx - arrow_w, cy)], fill=fg)
+    # bigger arrows with 1px separation
+    aw = int(sz * 0.16)
+    ah = int(sz * 0.34)
 
-    cx2 = int(sz * 0.68) + gap; cy2 = sz // 2
-    draw.polygon([(cx2 - arrow_w, cy2 - arrow_h // 2),
-                  (cx2 - arrow_w, cy2 + arrow_h // 2),
-                  (cx2 + arrow_w, cy2)], fill=fg)
+    cx1 = int(sz * 0.32) - gap; cy = sz // 2
+    d.polygon([(cx1+aw, cy-ah//2), (cx1+aw, cy+ah//2), (cx1-aw, cy)], fill=fg)
+
+    cx2 = int(sz * 0.68) + gap
+    d.polygon([(cx2-aw, cy-ah//2), (cx2-aw, cy+ah//2), (cx2+aw, cy)], fill=fg)
 
     return img
 
 def main():
-    ap = argparse.ArgumentParser(description="Generate PNG & ICO icons (1px corners + arrows with 1px separation)")
-    ap.add_argument("--png", default="window-mover-256.png", help="PNG output path (default: window-mover-256.png)")
-    ap.add_argument("--ico", default="window-mover.ico", help="ICO output path (default: window-mover.ico)")
-    ap.add_argument("--size", type=int, default=256, help="PNG size in px (default: 256)")
+    ap = argparse.ArgumentParser(description="Generate Window Mover icons (PNG simple + ICO with arrows)")
+    ap.add_argument("--png", default="window-mover-256.png", help="PNG output (default: window-mover-256.png)")
+    ap.add_argument("--ico", default="window-mover.ico", help="ICO output (default: window-mover.ico)")
+    ap.add_argument("--size", type=int, default=256, help="PNG size (default: 256)")
     ap.add_argument("--fg", default="#000000", help="Foreground color (hex or 'transparent'). Default: #000000")
     ap.add_argument("--bg", default="transparent", help="Background color (hex or 'transparent'). Default: transparent")
+    ap.add_argument("--png-thickness", type=int, default=None, help="PNG corner thickness in px (default: ~8% of size)")
     args = ap.parse_args()
 
     fg = parse_color(args.fg)
     bg = None if args.bg.lower() == "transparent" else parse_color(args.bg)
 
-    # PNG (rounded caps)
-    png_img = icon_png(args.size, fg, bg)
+    # PNG simple (like the provided sample image)
+    png_img = png_simple(args.size, fg, bg, thickness=args.png_thickness)
     png_img.save(args.png, format="PNG")
 
-    # ICO (square caps), multi-size layers
+    # ICO multi-size (with arrows)
     sizes = [16, 24, 32, 48, 64, 128, 256]
-    layers = [icon_ico_layer(s, fg, bg) for s in sizes]
+    layers = [ico_layer(s, fg, bg) for s in sizes]
     layers[0].save(args.ico, sizes=[(s, s) for s in sizes], format="ICO")
 
     print(f"Done:\n - PNG: {args.png}\n - ICO:  {args.ico}")
