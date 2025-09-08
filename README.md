@@ -5,7 +5,7 @@
 ![AHK](https://img.shields.io/badge/AutoHotkey-v2.x-green)
 
 <p align="center">
-  <img src="window-mover-simple-256.png" alt="Window Mover Icon" width="128" />
+  <img src="window-mover-256.png" alt="Window Mover Icon" width="128" />
 </p>
 
 A small AutoHotkey v2 utility to move a selected window between monitors (by physical layout) and maximize it.  
