@@ -112,12 +112,6 @@ EXE: Ahk2Exe + `window-mover-simple.ico`.
 
 ---
 
-## License
-
-MIT
-
----
-
 ## Build Icons (Windows / Linux / macOS)
 
 This project includes a cross-platform script to generate icons.
@@ -139,3 +133,10 @@ python make_icons.py --fg #FFFFFF --bg #1E90FF --size 512
 # Custom output paths
 python make_icons.py --png assets/icon.png --ico assets/icon.ico
 
+---
+
+## License
+
+MIT
+
+---
