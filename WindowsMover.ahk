@@ -2,38 +2,16 @@
 #SingleInstance Force
 
 ; ========== Config ==========
-global appVersion := "v1.0.0"
+global appVersion := "v1.0.1"
 
 ; INI path per le preferenze utente
 SettingsPath() => A_ScriptDir "\WindowMover.ini"
 
-; Auto-detect lingua da LCID Windows (A_Language); fallback = "en"
-; IMPORTANTE: A_Language è già una stringa tipo "0410" → NON convertire in numero.
-DetectLang() {
-    lcid := SubStr(A_Language, 1, 4)          ; es: "0410", "0409", "0C0A"
-    english := ["0009","0409","0809","0C09","1009","1409","1809","1C09","2009","2409","2809","2C09","3009","3409"]
-    spanish := ["040A","080A","0C0A","100A","140A","180A","1C0A","200A","240A","280A","2C0A","300A","340A","380A","3C0A","400A","440A","480A","4C0A","500A"]
-    french  := ["040C","080C","0C0C","100C","140C","180C"]
-    german  := ["0407","0807","0C07","1007","1407"]
-
-    if (lcid = "0410")       ; Italiano
-        return "it"
-    if english.Has(lcid)
-        return "en"
-    if spanish.Has(lcid)
-        return "es"
-    if french.Has(lcid)
-        return "fr"
-    if german.Has(lcid)
-        return "de"
-    return "en"
-}
-
-; Carica/imposta lingua: preferenza da INI -> altrimenti auto-detect -> fallback EN
+; Carica/imposta lingua: solo da INI, altrimenti fallback EN
 LoadSettings() {
     lang := IniRead(SettingsPath(), "General", "Language", "")
     if !(lang ~= "^(en|it|es|fr|de)$")
-        lang := DetectLang()
+        lang := "en"
     return lang
 }
 SaveSettings(lang) {
@@ -49,8 +27,11 @@ global L := Map(
         "LblNone","No window selected","LblSelected","Selected:",
         "MsgPickRow","Select a row.","MsgGone","The window no longer exists.",
         "MsgNoTarget","No window stored or it was closed. Select it and press 'Store'.",
-        "TrayStored","Stored window:","LblVersion","Version:",
-        "LangLabel","Language:"
+        "TrayStored","Stored window:","LblVersion","Version:","LangLabel","Language:",
+        "HotkeysHdr","Keyboard Shortcuts",
+        "HKRight","Ctrl+Alt+Right  — Move to right monitor",
+        "HKLeft","Ctrl+Alt+Left   — Move to left monitor",
+        "HKUndo","Ctrl+Alt+Backspace — Undo last move"
     ),
     "it", Map(
         "AppTitle","Window Mover","ColTitle","Titolo","ColApp","App","ColHWND","HWND",
@@ -59,8 +40,11 @@ global L := Map(
         "LblNone","Nessuna finestra selezionata","LblSelected","Selezionata:",
         "MsgPickRow","Seleziona una riga.","MsgGone","La finestra non esiste più.",
         "MsgNoTarget","Nessuna finestra memorizzata o è stata chiusa. Selezionala e premi 'Memorizza'.",
-        "TrayStored","Finestra memorizzata:","LblVersion","Versione:",
-        "LangLabel","Lingua:"
+        "TrayStored","Finestra memorizzata:","LblVersion","Versione:","LangLabel","Lingua:",
+        "HotkeysHdr","Scorciatoie da tastiera",
+        "HKRight","Ctrl+Alt+Freccia Destra  — Sposta sul monitor di destra",
+        "HKLeft","Ctrl+Alt+Freccia Sinistra — Sposta sul monitor di sinistra",
+        "HKUndo","Ctrl+Alt+Backspace       — Annulla l’ultimo spostamento"
     ),
     "es", Map(
         "AppTitle","Window Mover","ColTitle","Título","ColApp","App","ColHWND","HWND",
@@ -69,8 +53,11 @@ global L := Map(
         "LblNone","Ninguna ventana seleccionada","LblSelected","Seleccionada:",
         "MsgPickRow","Selecciona una fila.","MsgGone","La ventana ya no existe.",
         "MsgNoTarget","No hay ventana guardada o se cerró. Selecciónala y pulsa 'Guardar'.",
-        "TrayStored","Ventana guardada:","LblVersion","Versión:",
-        "LangLabel","Idioma:"
+        "TrayStored","Ventana guardada:","LblVersion","Versión:","LangLabel","Idioma:",
+        "HotkeysHdr","Atajos de teclado",
+        "HKRight","Ctrl+Alt+→  — Mover al monitor derecho",
+        "HKLeft","Ctrl+Alt+←  — Mover al monitor izquierdo",
+        "HKUndo","Ctrl+Alt+Backspace — Deshacer último movimiento"
     ),
     "fr", Map(
         "AppTitle","Window Mover","ColTitle","Titre","ColApp","App","ColHWND","HWND",
@@ -79,8 +66,11 @@ global L := Map(
         "LblNone","Aucune fenêtre sélectionnée","LblSelected","Sélectionnée :",
         "MsgPickRow","Sélectionnez une ligne.","MsgGone","La fenêtre n’existe plus.",
         "MsgNoTarget","Aucune fenêtre mémorisée ou elle a été fermée. Sélectionnez-la et cliquez sur 'Mémoriser'.",
-        "TrayStored","Fenêtre mémorisée :","LblVersion","Version :",
-        "LangLabel","Langue :"
+        "TrayStored","Fenêtre mémorisée :","LblVersion","Version :","LangLabel","Langue :",
+        "HotkeysHdr","Raccourcis clavier",
+        "HKRight","Ctrl+Alt+→  — Déplacer vers l’écran de droite",
+        "HKLeft","Ctrl+Alt+←  — Déplacer vers l’écran de gauche",
+        "HKUndo","Ctrl+Alt+Backspace — Annuler le dernier déplacement"
     ),
     "de", Map(
         "AppTitle","Window Mover","ColTitle","Titel","ColApp","App","ColHWND","HWND",
@@ -89,8 +79,11 @@ global L := Map(
         "LblNone","Kein Fenster ausgewählt","LblSelected","Ausgewählt:",
         "MsgPickRow","Wählen Sie eine Zeile aus.","MsgGone","Das Fenster existiert nicht mehr.",
         "MsgNoTarget","Kein Fenster gespeichert oder es wurde geschlossen. Wählen Sie es aus und klicken Sie auf 'Speichern'.",
-        "TrayStored","Gespeichertes Fenster:","LblVersion","Version:",
-        "LangLabel","Sprache:"
+        "TrayStored","Gespeichertes Fenster:","LblVersion","Version:","LangLabel","Sprache:",
+        "HotkeysHdr","Tastenkürzel",
+        "HKRight","Strg+Alt+→  — Auf rechten Monitor verschieben",
+        "HKLeft","Strg+Alt+←  — Auf linken Monitor verschieben",
+        "HKUndo","Strg+Alt+Backspace — Letzte Aktion rückgängig"
     )
 )
 
@@ -100,11 +93,12 @@ global g_Hwnd := 0
 global g_History := Map()
 
 ; ========== GUI ==========
-global winGui, lv, txtSel, lblControls, btnRef, btnMem, btnLeft, btnRight, btnUndo, lblVersion, ddLang, lblLang
+global winGui, lv, txtSel, lblControls, btnRef, btnMem, btnLeft, btnRight, btnUndo, lblVersion, ddLang, lblLang, lblHot, txtHK
 
 BuildGui()
 RefreshList()
 winGui.Show()
+ApplyTexts()
 
 ; ========= Hotkeys =========
 ^!Right:: MovePhysical("right")
@@ -113,11 +107,11 @@ winGui.Show()
 
 ; ========= Funzioni GUI / Localizzazione =========
 BuildGui() {
-    global winGui, lv, txtSel, lblControls, btnRef, btnMem, btnLeft, btnRight, btnUndo, lblVersion, ddLang, lblLang, currentLang, appVersion
+    global winGui, lv, txtSel, lblControls, btnRef, btnMem, btnLeft, btnRight, btnUndo, lblVersion, ddLang, lblLang, currentLang, appVersion, lblHot, txtHK
 
     winGui := Gui("", GetText("AppTitle") " " appVersion)
 
-    ; Barra lingua (label tradotta)
+    ; Barra lingua
     lblLang := winGui.Add("Text", "xm ym", GetText("LangLabel"))
     ddLang  := winGui.Add("DropDownList", "x+6 w200 vLANG Choose1", ["English","Italiano","Español","Français","Deutsch"])
     langs := Map("en",1,"it",2,"es",3,"fr",4,"de",5)
@@ -127,22 +121,27 @@ BuildGui() {
     ; Lista finestre
     lv := winGui.Add("ListView", "xm y+8 w820 r18 vLV Grid", [GetText("ColTitle"), GetText("ColApp"), GetText("ColHWND")])
 
-    ; Pulsanti e label (larghezze aumentate per evitare tagli di testo)
+    ; Pulsanti e label
     btnRef := winGui.Add("Button", "xm y+6 w160", GetText("BtnRefresh"))
-    btnMem := winGui.Add("Button", "x+10 w200",   GetText("BtnMem"))       ; <-- più largo
+    btnMem := winGui.Add("Button", "x+10 w200",   GetText("BtnMem"))
     txtSel := winGui.Add("Text", "x+10 w380", GetText("LblNone"))
 
     lblControls := winGui.Add("Text", "xm y+10", GetText("LblControls"))
     btnLeft  := winGui.Add("Button", "xm w160", GetText("BtnLeft"))
     btnRight := winGui.Add("Button", "x+10 w160", GetText("BtnRight"))
-    btnUndo  := winGui.Add("Button", "x+10 w200", GetText("BtnUndo"))       ; <-- più largo
+    btnUndo  := winGui.Add("Button", "x+10 w200", GetText("BtnUndo"))
 
     lblVersion := winGui.Add("Text", "xm y+16 cGray", GetText("LblVersion") " " appVersion)
 
-    ; Colonne leggibili (2° parametro = width/opzioni, 3° = titolo)
+    ; Colonne
     lv.ModifyCol(1, 380,       GetText("ColTitle"))
     lv.ModifyCol(2, "AutoHdr", GetText("ColApp"))
     lv.ModifyCol(3, "AutoHdr", GetText("ColHWND"))
+
+    ; Scorciatoie visibili
+    lblHot := winGui.Add("Text", "xm y+14", GetText("HotkeysHdr"))
+    lblHot.SetFont("Bold")
+    txtHK  := winGui.Add("Text", "xm y+4 w820", BuildHotkeysText())
 
     ; Eventi
     btnRef.OnEvent("Click", RefreshList)
@@ -154,10 +153,13 @@ BuildGui() {
     winGui.OnEvent("Size", (*) => AutoResizeCols())
 }
 
+BuildHotkeysText() {
+    return GetText("HKRight") "`n" GetText("HKLeft") "`n" GetText("HKUndo")
+}
+
 OnLangChanged() {
     global ddLang, currentLang
-    ; usa l'indice per mappare in modo robusto
-    idx := ddLang.Value  ; 1..5
+    idx := ddLang.Value
     langByIndex := ["en","it","es","fr","de"]
     currentLang := (idx >= 1 && idx <= langByIndex.Length) ? langByIndex[idx] : "en"
     SaveSettings(currentLang)
@@ -165,11 +167,10 @@ OnLangChanged() {
 }
 
 ApplyTexts() {
-    global winGui, lv, btnRef, btnMem, txtSel, lblControls, btnLeft, btnRight, btnUndo, lblVersion, lblLang, appVersion
+    global winGui, lv, btnRef, btnMem, txtSel, lblControls, btnLeft, btnRight, btnUndo, lblVersion, lblLang, lblHot, txtHK, appVersion
     winGui.Title := GetText("AppTitle") " " appVersion
     lblLang.Text := GetText("LangLabel")
 
-    ; aggiorna testi colonne mantenendo larghezze
     lv.ModifyCol(1, 380,       GetText("ColTitle"))
     lv.ModifyCol(2, "AutoHdr", GetText("ColApp"))
     lv.ModifyCol(3, "AutoHdr", GetText("ColHWND"))
@@ -180,9 +181,13 @@ ApplyTexts() {
     btnLeft.Text := GetText("BtnLeft")
     btnRight.Text := GetText("BtnRight")
     btnUndo.Text := GetText("BtnUndo")
+
     if !StrLen(txtSel.Text) || RegExMatch(txtSel.Text, "i)^(No window|Nessuna|Ninguna|Aucune|Kein)\s")
         txtSel.Text := GetText("LblNone")
     lblVersion.Text := GetText("LblVersion") " " appVersion
+
+    lblHot.Text := GetText("HotkeysHdr")
+    txtHK.Text  := BuildHotkeysText()
 
     AutoResizeCols()
 }
@@ -194,7 +199,6 @@ GetText(key) {
 
 AutoResizeCols() {
     global lv
-    ; Solo dimensioni; i titoli restano invariati
     lv.ModifyCol(1, 380)
     lv.ModifyCol(2, "AutoHdr")
     lv.ModifyCol(3, "AutoHdr")
@@ -211,7 +215,7 @@ RefreshList(*) {
         class := WinGetClass("ahk_id " hwnd)
         if (class = "Progman" || class = "WorkerW")
             continue
-        if !(WinGetStyle("ahk_id " hwnd) & 0x10000000) ; WS_VISIBLE
+        if !(WinGetStyle("ahk_id " hwnd) & 0x10000000)
             continue
         exe := ""
         try exe := WinGetProcessName("ahk_id " hwnd)
@@ -322,6 +326,3 @@ UndoMove() {
     if (prev.state = 1)
         WinMaximize(wt)
 }
-
-; Applica i testi localizzati dopo costruzione iniziale
-ApplyTexts()
