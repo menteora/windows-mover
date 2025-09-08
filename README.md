@@ -107,13 +107,13 @@ EXE: Ahk2Exe + `window-mover-simple.ico`.
 
 - `WindowMover.ahk` – the script  
 - `WindowMover.ini` – user settings (language)  
-- `window-mover-simple.ico` – application icon (for EXE)  
-- `window-mover-simple-256.png` – preview icon for README  
+- `window-mover.ico` – application icon (for EXE)  
+- `window-mover-256.png` – preview icon for README  
 
 ---
 
 ## Build Icons (Google Colab)
-Cut and paste code inside Google Colab
+Cut and paste code of `make_icons.py` inside Google Colab
 
 ---
 
