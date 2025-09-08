@@ -113,8 +113,8 @@ EXE: Ahk2Exe + `window-mover-simple.ico`.
 ---
 
 ## Build Icons (Google Colab)
-
 Cut and paste code inside Google Colab
+
 ---
 
 ## License
