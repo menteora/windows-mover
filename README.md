@@ -1,6 +1,6 @@
 # Window Mover
 
-![Version](https://img.shields.io/badge/version-v1.2.3-blue)
+![Version](https://img.shields.io/badge/version-v1.0.0-blue)
 ![Platform](https://img.shields.io/badge/Windows-11-tested)
 ![AHK](https://img.shields.io/badge/AutoHotkey-v2.x-green)
 
